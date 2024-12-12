@@ -1,29 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<h1 align="center">Notes</h1>
+<h1 align="center">David's BikesShop</h1>
 
 <!-- Centered Image -->
 <div class="text-center my-4">
   <img src="https://roguemotorcycles.com.au/cdn/shop/files/IMG_3345_3000x.jpg?v=1717751533" width="1000" height="780">
 </div>
 
-<ul class="list-group list-group-flush" id="notes">
-  {% for note in user.notes %}
-  <li class="list-group-item">
-    {{ note.data }}
-    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </li>
-  {% endfor %}
-</ul>
-
-<form method="POST">
-  <textarea name="note" id="note" class="form-control"></textarea>
-  <br />
-  <div align="center">
-    <button type="submit" class="btn btn-primary">Add Note</button>
-  </div>
-</form>
+<!-- Contact Information -->
+<div class="container my-4">
+  <h2>Contact Information</h2>
+  <p>Phone Number:  0711-111-111</p>
+  <h3>About Us</h3>
+  <p>David's BikeShop is dedicated to providing the best motorbikes, riding accessories and parts for all your needs and your bikes needs.</p>
+</div>
 {% endblock %}

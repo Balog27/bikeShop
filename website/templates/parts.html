@@ -7,10 +7,10 @@
     <h1 class="text-center my-4">Parts</h1>
     <div class="text-center my-4">
         <form class="form-inline d-flex justify-content-center">
-            <input type="text" id="searchInput" class="form-control mr-2" placeholder="Search for parts...">
-            <button type="button" class="btn btn-secondary mr-2" onclick="filterByPriceAsc()">Filter by Price Ascending</button>
-            <button type="button" class="btn btn-secondary mr-2" onclick="filterByPriceDesc()">Filter by Price Descending</button>
-            <button type="button" class="btn btn-secondary" onclick="filterAlphabetically()">Filter Alphabetically</button>
+            <input type="text" id="searchInput" class="form-control mr-2" placeholder="Search for parts..." value="{{ request.args.get('search', '') }}">
+            <button type="button" class="btn btn-secondary mr-2" onclick="applyFilter('price_asc')">Filter by Price Ascending</button>
+            <button type="button" class="btn btn-secondary mr-2" onclick="applyFilter('price_desc')">Filter by Price Descending</button>
+            <button type="button" class="btn btn-secondary" onclick="applyFilter('alphabetical')">Filter Alphabetically</button>
         </form>
     </div>
     <div class="row" id="partsContainer">
@@ -40,7 +40,7 @@
             <ul class="pagination">
                 {% if parts.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('parts.parts', page=parts.prev_num) }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('parts.parts', page=parts.prev_num, search=request.args.get('search', ''), filter=request.args.get('filter', '')) }}">Previous</a>
                 </li>
                 {% else %}
                 <li class="page-item disabled">
@@ -50,7 +50,7 @@
                 {% for page_num in parts.iter_pages() %}
                 {% if page_num %}
                 <li class="page-item {% if page_num == parts.page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('parts.parts', page=page_num) }}">{{ page_num }}</a>
+                    <a class="page-link" href="{{ url_for('parts.parts', page=page_num, search=request.args.get('search', ''), filter=request.args.get('filter', '')) }}">{{ page_num }}</a>
                 </li>
                 {% else %}
                 <li class="page-item disabled">
@@ -60,7 +60,7 @@
                 {% endfor %}
                 {% if parts.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('parts.parts', page=parts.next_num) }}">Next</a>
+                    <a class="page-link" href="{{ url_for('parts.parts', page=parts.next_num, search=request.args.get('search', ''), filter=request.args.get('filter', '')) }}">Next</a>
                 </li>
                 {% else %}
                 <li class="page-item disabled">
@@ -73,31 +73,26 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block javascript %}
 <script>
-document.getElementById('searchInput').addEventListener('input', function() {
-    const query = this.value.toLowerCase();
-    const partCards = document.querySelectorAll('.part-card');
-    partCards.forEach(card => {
-        const partName = card.querySelector('.card-title').textContent.toLowerCase();
-        if (partName.includes(query)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-});
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
 
-function filterByPriceAsc() {
-    window.location.href = "{{ url_for('parts.filter_by_price_asc') }}";
-}
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', debounce(function () {
+        const searchQuery = this.value;
+        const currentFilter = new URLSearchParams(window.location.search).get('filter') || '';
+        window.location.href = `{{ url_for('parts.parts') }}?search=${searchQuery}&filter=${currentFilter}`;
+    }, 300));
 
-function filterByPriceDesc() {
-    window.location.href = "{{ url_for('parts.filter_by_price_desc') }}";
-}
-
-function filterAlphabetically() {
-    window.location.href = "{{ url_for('parts.filter_in_alphabetical_order') }}";
-}
+    function applyFilter(filterOption) {
+        const searchQuery = new URLSearchParams(window.location.search).get('search') || '';
+        window.location.href = `{{ url_for('parts.parts') }}?search=${searchQuery}&filter=${filterOption}`;
+    }
 </script>
 {% endblock %}
